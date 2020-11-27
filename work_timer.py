@@ -85,7 +85,7 @@ class Work_Timer(object):
         self.today = datetime.datetime.now().date()
         if os.path.isfile(self.file_name)==0: # Create file
             self.data=[]
-            self.data.append({'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0, 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})
+            self.data.append({'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0})  # , 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})
             save_json( self.data, self.file_name )
             self.current_index = 0
         else: #Find this date in the notebook
@@ -95,7 +95,7 @@ class Work_Timer(object):
             if last_date!=self.today:  # Create intermediate data entries
                 while last_date!=self.today:
                     last_date = last_date + datetime.timedelta(days = 1)  # Add one day
-                    self.data.append({'date': last_date, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0, 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})  # Add new day to list
+                    self.data.append({'date': last_date, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0})  # , 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})  # Add new day to list
                     self.current_index = len(self.data)-1
         save_json(self.data, self.file_name)
         self.how_many_days = 7
@@ -124,7 +124,7 @@ class Work_Timer(object):
         self.warn = np.multiply(np.exp(-(x - length / 2) ** 2 / (length / 6) ** 2), arr3)
 
         # Create variables for total work time and current work time
-        # {'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0, 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []}
+        # {'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0})  # , 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []}
         self.load_data()
 
         self.started = 0
@@ -140,10 +140,10 @@ class Work_Timer(object):
         self.total_work_time = self.data[self.current_index]['total_work_time']
         self.how_much_total_pauses = self.data[self.current_index]['total_pause_time']
         self.how_much_pause = self.data[self.current_index]['remaining_earned_pause_time']
-        self.work_starts = self.data[self.current_index]['work_starts']
-        self.work_ends = self.data[self.current_index]['work_ends']
-        self.pause_starts = self.data[self.current_index]['pause_starts']
-        self.pause_ends = self.data[self.current_index]['pause_ends']
+        #self.work_starts = self.data[self.current_index]['work_starts']
+        #self.work_ends = self.data[self.current_index]['work_ends']
+        #self.pause_starts = self.data[self.current_index]['pause_starts']
+        #self.pause_ends = self.data[self.current_index]['pause_ends']
         self.current_total_work = self.total_work_time
         self.current_total_pause = self.how_much_total_pauses
 
@@ -230,11 +230,11 @@ class Work_Timer(object):
             if self.currently_working==0:
                 option_text = 'Nothing'
             elif self.currently_working==1:
-                tcum = time.time() - self.started
+                tcum = time.time() - self.changed
                 tcum_struct = time.gmtime(tcum)
                 option_text = 'Working - '+time.strftime("%H:%M:", tcum_struct)+' [hh:mm]'
             else:
-                tcum = time.time() - self.started
+                tcum = time.time() - self.changed
                 tcum_struct = time.gmtime(tcum)
                 option_text = 'Pausing - '+time.strftime("%H:%M:", tcum_struct)+' [hh:mm]'
             item, extras = win32gui_struct.PackMENUITEMINFO(text=option_text, hbmpItem=option_icon, wID=option_id)
@@ -353,16 +353,16 @@ class Work_Timer(object):
 
         if (datetime.datetime.now() + datetime.timedelta(seconds=5)).date() != self.today:  #
             # A new day started stop work counter, give warning sign
-            if self.currently_working != 0:
-                self.done()
-                sd.play(self.high, self.bitrate, blocking=True)
-                # Wait until new day:
-                while datetime.datetime.now().date() == self.today:
-                    time.sleep(1)
-                #Change day
-                self.today=datetime.datetime.now().date()
-                self.data.append({'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0, 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})
-                self.load_data()
+            self.done()
+            sd.play(self.high, self.bitrate, blocking=True)
+            # Wait until new day:
+            while datetime.datetime.now().date() == self.today:
+                time.sleep(1)
+            #Change day
+            self.today=datetime.datetime.now().date()
+            self.data.append({'date': self.today, 'total_work_time': 0, 'total_pause_time': 0, 'remaining_earned_pause_time': 0})  # , 'work_starts': [], 'work_ends': [], 'pause_starts': [], 'pause_ends': []})
+            self.current_index = len(self.data) - 1
+            self.load_data()
 
             # This way we have no problems with the variables
 
@@ -485,10 +485,11 @@ class Work_Timer(object):
             self.how_much_total_pauses = self.how_much_total_pauses + tcum
             self.data[self.current_index]['total_pause_time'] = self.how_much_total_pauses
             self.data[self.current_index]['remaining_earned_pause_time'] = self.how_much_pause
-            self.pause_starts = curr_time - tcum
-            self.pause_ends = curr_time
-            self.data[self.current_index]['pause_starts'].append(self.pause_starts)
-            self.data[self.current_index]['pause_ends'].append(self.pause_ends)
+            #self.pause_starts = curr_time - tcum
+            #self.pause_ends = curr_time
+            #self.data[self.current_index]['pause_starts'].append(self.pause_starts)
+            #self.data[self.current_index]['pause_ends'].append(self.pause_ends)
+            self.changed = curr_time
         elif self.currently_working == 1:
             curr_time = time.time()
             tcum = curr_time - self.started
@@ -496,12 +497,13 @@ class Work_Timer(object):
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
             self.data[self.current_index]['total_work_time'] = self.total_work_time
 
-            self.work_starts = curr_time - tcum
-            self.work_ends = curr_time
-            self.data[self.current_index]['work_starts'].append(self.work_starts)
-            self.data[self.current_index]['work_ends'].append(self.work_ends)
+            #self.work_starts = curr_time - tcum
+            #self.work_ends = curr_time
+            #self.data[self.current_index]['work_starts'].append(self.work_starts)
+            #self.data[self.current_index]['work_ends'].append(self.work_ends)
         else:
             curr_time = time.time()
+            self.changed = curr_time
 
         self.started = curr_time
 
@@ -534,10 +536,11 @@ class Work_Timer(object):
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
             self.data[self.current_index]['total_work_time'] = self.total_work_time
 
-            self.work_starts = curr_time - tcum
-            self.work_ends = curr_time
-            self.data[self.current_index]['work_starts'].append(self.work_starts)
-            self.data[self.current_index]['work_ends'].append(self.work_ends)
+            #self.work_starts = curr_time - tcum
+            #self.work_ends = curr_time
+            #self.data[self.current_index]['work_starts'].append(self.work_starts)
+            #self.data[self.current_index]['work_ends'].append(self.work_ends)
+            self.changed = curr_time
         elif self.currently_working == 2:
             curr_time = time.time()
             tcum = curr_time - self.started
@@ -546,12 +549,13 @@ class Work_Timer(object):
             self.data[self.current_index]['total_pause_time'] = self.how_much_total_pauses
             self.data[self.current_index]['remaining_earned_pause_time'] = self.how_much_pause
 
-            self.pause_starts = curr_time - tcum
-            self.pause_ends = curr_time
-            self.data[self.current_index]['pause_starts'].append(self.pause_starts)
-            self.data[self.current_index]['pause_ends'].append(self.pause_ends)
+            #self.pause_starts = curr_time - tcum
+            #self.pause_ends = curr_time
+            #self.data[self.current_index]['pause_starts'].append(self.pause_starts)
+            #self.data[self.current_index]['pause_ends'].append(self.pause_ends)
         else:
             curr_time = time.time()
+            self.changed = curr_time
 
         self.started = curr_time
 
@@ -574,19 +578,21 @@ class Work_Timer(object):
             tcum = time.time() - self.started
             self.total_work_time = self.total_work_time + tcum
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
-            self.work_starts = curr_time - tcum
-            self.work_ends = curr_time
-            self.data[self.current_index]['work_starts'].append(self.work_starts)
-            self.data[self.current_index]['work_ends'].append(self.work_ends)
+            #self.work_starts = curr_time - tcum
+            #self.work_ends = curr_time
+            #self.data[self.current_index]['work_starts'].append(self.work_starts)
+            #self.data[self.current_index]['work_ends'].append(self.work_ends)
+            self.changed = curr_time
 
         if self.currently_working == 2:
             tcum = time.time() - self.started
             self.how_much_pause = self.how_much_pause - tcum
             self.how_much_total_pauses = self.how_much_total_pauses + tcum
-            self.pause_starts = curr_time - tcum
-            self.pause_ends = curr_time
-            self.data[self.current_index]['pause_starts'].append(self.pause_starts)
-            self.data[self.current_index]['pause_ends'].append(self.pause_ends)
+            #self.pause_starts = curr_time - tcum
+            #self.pause_ends = curr_time
+            #self.data[self.current_index]['pause_starts'].append(self.pause_starts)
+            #self.data[self.current_index]['pause_ends'].append(self.pause_ends)
+            self.changed = curr_time
 
         self.data[self.current_index]['total_work_time'] = self.total_work_time
         self.data[self.current_index]['total_pause_time'] = self.how_much_total_pauses
