@@ -702,7 +702,7 @@ def extract_total_pauses(data, how_many_days, total_pause_time):
     paused = []
     if len(data) > how_many_days:
         for i in range(len(data) - how_many_days, len(data)):
-            paused.append(data[i]['total_paused_time'])
+            paused.append(data[i]['total_pause_time'])
     else:
         length = len(data)
         for i in range(0, how_many_days - length):
