@@ -5,4 +5,4 @@ Programmed in python 3.8. All packages are listed in the header and can be downl
 The tool opens a tkinter based gui, to track productivity. When closed via a click on the x-Button, it gets minimized to the system tray, from which it can be called up again. 
 Using pyinstall, it can be turned into a console free program. Below you can see how the GUI looks.
 
-![alt text](https://github.com/Ntropic/Work_Timer/blob/main/Screenshot%20(869).png?raw=true)
+![alt text](https://github.com/Ntropic/Work_Timer/blob/main/Screenshot%20(872).png?raw=true)
