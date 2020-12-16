@@ -571,7 +571,6 @@ class Work_Timer(object):
                                 self.counter = self.counter + 1
                             else:
                                 sd.play(self.low53, self.bitrate)
-                                self.doing_timer = 0 # Stop working
                                 self.done()
                                 self.counter = 0
 
@@ -580,7 +579,6 @@ class Work_Timer(object):
                                 sd.play(self.higher53, self.bitrate)
                                 self.counter = self.counter +1
                             else:
-                                self.doing_timer = 0
                                 self.done()
                                 self.counter = 0
 
@@ -641,6 +639,8 @@ class Work_Timer(object):
         if self.currently_working == 2:  # Previously a pause
             curr_time = time.time()
             tcum = curr_time - self.started
+            if tcum>120:
+                tcum = 120 #If computer is closed add no more than 2 minutes
             self.how_much_pause = self.how_much_pause - tcum
             self.how_much_total_pauses = self.how_much_total_pauses + tcum
             self.data[self.current_index]['total_pause_time'] = self.how_much_total_pauses
@@ -652,6 +652,8 @@ class Work_Timer(object):
         elif self.currently_working == 1:
             curr_time = time.time()
             tcum = curr_time - self.started
+            if tcum > 120:
+                tcum = 120  # If computer is closed add no more than 2 minutes
             self.total_work_time = self.total_work_time + tcum
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
             self.data[self.current_index]['total_work_time'] = self.total_work_time
@@ -712,6 +714,8 @@ class Work_Timer(object):
         if self.currently_working == 1:
             curr_time = time.time()
             tcum = curr_time - self.started
+            if tcum>120:
+                tcum = 120 #If computer is closed add no more than 2 minutes
             self.total_work_time = self.total_work_time + tcum
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
             self.data[self.current_index]['total_work_time'] = self.total_work_time
@@ -727,6 +731,8 @@ class Work_Timer(object):
         elif self.currently_working == 2:
             curr_time = time.time()
             tcum = curr_time - self.started
+            if tcum>120:
+                tcum = 120 #If computer is closed add no more than 2 minutes
             self.how_much_pause = self.how_much_pause - tcum
             self.how_much_total_pauses = self.how_much_total_pauses + tcum
             self.data[self.current_index]['total_pause_time'] = self.how_much_total_pauses
@@ -755,6 +761,7 @@ class Work_Timer(object):
     def done(self):
         self.counter = 0
         self.doing_timer = 0
+        self.timer = datetime.timedelta(seconds=0)
 
         self.pause_button['state'] = 'normal'
         self.work_button_main['state'] = 'normal'
@@ -775,6 +782,8 @@ class Work_Timer(object):
         curr_time = time.time()
         if self.currently_working == 1:
             tcum = time.time() - self.started
+            if tcum>120:
+                tcum = 120 #If computer is closed add no more than 2 minutes
             self.total_work_time = self.total_work_time + tcum
             self.how_much_pause = self.how_much_pause + tcum * self.work_pause_ratio
             self.changed = curr_time
@@ -786,6 +795,8 @@ class Work_Timer(object):
 
         if self.currently_working == 2:
             tcum = time.time() - self.started
+            if tcum>120:
+                tcum = 120 #If computer is closed add no more than 2 minutes
             self.how_much_pause = self.how_much_pause - tcum
             self.how_much_total_pauses = self.how_much_total_pauses + tcum
             self.changed = curr_time
